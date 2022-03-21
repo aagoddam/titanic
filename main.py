@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-import keras as k
-from sklearn.preprocessing import LabelEncoder,MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.linear_model import LogisticRegression
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -31,17 +30,19 @@ class Data:
     def clear(self):
         le = LabelEncoder()
         mm = MinMaxScaler()
-        self.data.Fare = mm.fit_transform(self.data.Fare.values.reshape(-1,1))
+        self.data.Fare = mm.fit_transform(self.data.Fare.values.reshape(-1, 1))
         self.data.Embarked = le.fit_transform(self.data.Embarked)
         self.data.Sex = self.data.Sex.apply(lambda val: 1 if val == 'male' else 0)
         self.data.Age = self.data.apply(
-            lambda row: age_encod(self.age_dict[str(row.Sex)]) if str(row.Age) == 'nan' else age_encod(row.Age), axis=1).astype(int)
+            lambda row: age_encod(self.age_dict[str(row.Sex)]) if str(row.Age) == 'nan' else age_encod(row.Age),
+            axis=1).astype(int)
         self.data["Embarked"].fillna(self.data.Embarked.value_counts().max(), inplace=True)
         self.data.Ticket = self.data["Ticket"].apply(lambda x: int(x.isdigit()))
         del self.data["Cabin"], self.data["PassengerId"], self.data["Name"]
 
     def to_model(self):
         return XY(self.data)
+
 
 class XY:
 
@@ -60,4 +61,3 @@ if __name__ == '__main__':
     Data.clear()
     dat = Data.to_model()
     X, Y = dat.get()
-    print(X)
